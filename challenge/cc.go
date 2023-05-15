@@ -37,7 +37,7 @@ func getOpenDirs(pathIn string) (rtn []*dir) {
 	return rtn
 }
 
-type pathRec struct {
+type path struct {
 	path string
 	x, y int
 }
@@ -55,8 +55,8 @@ func (m *maze) move(x, y, xd, yd int) (int, int) {
 }
 
 func (m *maze) breadthFirstSearch(
-	paths []pathRec,
-) *pathRec {
+	paths []path,
+) *path {
 	for len(paths) > 0 {
 
 		h := paths[0]
@@ -72,7 +72,7 @@ func (m *maze) breadthFirstSearch(
 			if xn >= 0 {
 				paths = append(
 					paths,
-					pathRec{
+					path{
 						h.path + d.path,
 						xn,
 						yn,
@@ -132,7 +132,7 @@ func RunBreadthFirst(key string) {
 	}
 
 	path := maze.breadthFirstSearch(
-		[]pathRec{
+		[]path{
 			{
 				key,
 				maze.xStart,
