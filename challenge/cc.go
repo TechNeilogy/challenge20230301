@@ -42,7 +42,7 @@ type Path struct {
 	x, y int
 }
 
-func (m *Maze) Move(x, y, xd, yd int) (xn, yn int) {
+func (m *Maze) Move(x, y, xd, yd int) (int, int) {
 	x += xd
 	if x < 0 || x >= m.xSize {
 		return -1, -1
@@ -86,11 +86,13 @@ func (m *Maze) BreadthFirstSearch(
 	return nil
 }
 
+// Setting findAll to true results in an exhaustive search.
 func (m *Maze) depthFirstSearch(
 	path string,
 	x int,
 	y int,
 	pathAcc *[]string,
+	findAll bool,
 ) bool {
 	if x == m.xGoal && y == m.yGoal {
 		*pathAcc = append(*pathAcc, path)
@@ -101,22 +103,15 @@ func (m *Maze) depthFirstSearch(
 	for _, d := range openDirs {
 		xn, yn := m.Move(x, y, d.dx, d.dy)
 		if xn >= 0 {
-			// Find all paths.
-			m.depthFirstSearch(
+			if m.depthFirstSearch(
 				path+d.path,
 				xn,
 				yn,
 				pathAcc,
-			)
-			// Stop on first found.
-			// if m.depthFirstSearch(
-			// 	path + d.path,
-			// 	xn,
-			// 	yn,
-			// 	pathAcc,
-			// ) {
-			// 	return true
-			// }
+				findAll,
+			) && !findAll {
+				return true
+			}
 		}
 	}
 
@@ -127,7 +122,7 @@ func (m *Maze) DepthFirstSearch(
 	key string,
 ) []string {
 	pathAcc := []string{}
-	m.depthFirstSearch(key, m.xStart, m.yStart, &pathAcc)
+	m.depthFirstSearch(key, m.xStart, m.yStart, &pathAcc, true)
 	return pathAcc
 }
 
@@ -148,11 +143,12 @@ func RunBreadthFirst(key string) {
 		},
 	)
 
+	fmt.Printf("Breadth First\n")
 	if path != nil {
 		shortest := path.path[len(key):]
-		fmt.Printf("BF Shortest: (%v) %s\n", len(shortest), shortest)
+		fmt.Printf("    Shortest: (%v) %s\n", len(shortest), shortest)
 	} else {
-		fmt.Println("BF No valid path.")
+		fmt.Println("    No valid path.")
 	}
 }
 
@@ -167,6 +163,7 @@ func RunDepthFirst(key string) {
 		key,
 	)
 
+	fmt.Printf("Depth First\n")
 	if len(paths) > 0 {
 		shortest := paths[0]
 		longest := paths[0]
@@ -180,10 +177,10 @@ func RunDepthFirst(key string) {
 		}
 		shortest = shortest[len(key):]
 		longest = longest[len(key):]
-		fmt.Printf("DF Shortest: (%v) %s\n", len(shortest), shortest)
-		fmt.Printf("DF Longest: (%v) %s\n", len(longest), longest)
+		fmt.Printf("    Shortest: (%v) %s\n", len(shortest), shortest)
+		fmt.Printf("    Longest: (%v) %s\n", len(longest), longest)
 	} else {
-		fmt.Println("DF No valid path.")
+		fmt.Println("    No valid path.")
 	}
 }
 
