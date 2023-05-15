@@ -67,8 +67,7 @@ func (m *Maze) BreadthFirstSearch(
 
 		paths = paths[1:]
 
-		openDirs := GetOpenDirs(h.path)
-		for _, d := range openDirs {
+		for _, d := range GetOpenDirs(h.path) {
 			xn, yn := m.Move(h.x, h.y, d.dx, d.dy)
 			if xn >= 0 {
 				paths = append(
@@ -99,8 +98,7 @@ func (m *Maze) depthFirstSearch(
 		return true
 	}
 
-	openDirs := GetOpenDirs(path)
-	for _, d := range openDirs {
+	for _, d := range GetOpenDirs(path) {
 		xn, yn := m.Move(x, y, d.dx, d.dy)
 		if xn >= 0 {
 			if m.depthFirstSearch(
