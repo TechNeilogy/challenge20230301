@@ -8,41 +8,41 @@ import (
 	"fmt"
 )
 
-type Maze struct {
+type maze struct {
 	xSize, ySize   int
 	xStart, yStart int
 	xGoal, yGoal   int
 }
 
-type Dir struct {
+type dir struct {
 	path   string
 	dx, dy int
 }
 
-var Dirs []Dir = []Dir{
+var dirs = []dir{
 	{"U", 0, -1},
 	{"D", 0, 1},
 	{"L", -1, 0},
 	{"R", 1, 0},
 }
 
-func GetOpenDirs(path string) (rtn []*Dir) {
-	hash := md5.Sum([]byte(path))
+func getOpenDirs(pathIn string) (rtn []*dir) {
+	hash := md5.Sum([]byte(pathIn))
 	four := hex.EncodeToString(hash[:])[0:4]
 	for i, c := range four {
 		if c >= 'b' {
-			rtn = append(rtn, &Dirs[i])
+			rtn = append(rtn, &dirs[i])
 		}
 	}
 	return rtn
 }
 
-type Path struct {
+type pathRec struct {
 	path string
 	x, y int
 }
 
-func (m *Maze) Move(x, y, xd, yd int) (int, int) {
+func (m *maze) move(x, y, xd, yd int) (int, int) {
 	x += xd
 	if x < 0 || x >= m.xSize {
 		return -1, -1
@@ -54,9 +54,9 @@ func (m *Maze) Move(x, y, xd, yd int) (int, int) {
 	return x, y
 }
 
-func (m *Maze) BreadthFirstSearch(
-	paths []Path,
-) *Path {
+func (m *maze) breadthFirstSearch(
+	paths []pathRec,
+) *pathRec {
 	for len(paths) > 0 {
 
 		h := paths[0]
@@ -67,12 +67,12 @@ func (m *Maze) BreadthFirstSearch(
 
 		paths = paths[1:]
 
-		for _, d := range GetOpenDirs(h.path) {
-			xn, yn := m.Move(h.x, h.y, d.dx, d.dy)
+		for _, d := range getOpenDirs(h.path) {
+			xn, yn := m.move(h.x, h.y, d.dx, d.dy)
 			if xn >= 0 {
 				paths = append(
 					paths,
-					Path{
+					pathRec{
 						h.path + d.path,
 						xn,
 						yn,
@@ -86,23 +86,23 @@ func (m *Maze) BreadthFirstSearch(
 }
 
 // Setting findAll to true results in an exhaustive search.
-func (m *Maze) depthFirstSearch(
-	path string,
+func (m *maze) depthFirstSearch0(
+	pathCurrent string,
 	x int,
 	y int,
 	pathAcc *[]string,
 	findAll bool,
 ) bool {
 	if x == m.xGoal && y == m.yGoal {
-		*pathAcc = append(*pathAcc, path)
+		*pathAcc = append(*pathAcc, pathCurrent)
 		return true
 	}
 
-	for _, d := range GetOpenDirs(path) {
-		xn, yn := m.Move(x, y, d.dx, d.dy)
+	for _, d := range getOpenDirs(pathCurrent) {
+		xn, yn := m.move(x, y, d.dx, d.dy)
 		if xn >= 0 {
-			if m.depthFirstSearch(
-				path+d.path,
+			if m.depthFirstSearch0(
+				pathCurrent+d.path,
 				xn,
 				yn,
 				pathAcc,
@@ -116,23 +116,23 @@ func (m *Maze) depthFirstSearch(
 	return false
 }
 
-func (m *Maze) DepthFirstSearch(
+func (m *maze) depthFirstSearch(
 	key string,
 ) []string {
-	pathAcc := []string{}
-	m.depthFirstSearch(key, m.xStart, m.yStart, &pathAcc, true)
+	var pathAcc []string
+	m.depthFirstSearch0(key, m.xStart, m.yStart, &pathAcc, true)
 	return pathAcc
 }
 
 func RunBreadthFirst(key string) {
-	maze := &Maze{
+	maze := &maze{
 		4, 4,
 		0, 0,
 		3, 3,
 	}
 
-	path := maze.BreadthFirstSearch(
-		[]Path{
+	path := maze.breadthFirstSearch(
+		[]pathRec{
 			{
 				key,
 				maze.xStart,
@@ -151,13 +151,13 @@ func RunBreadthFirst(key string) {
 }
 
 func RunDepthFirst(key string) {
-	maze := &Maze{
+	maze := &maze{
 		4, 4,
 		0, 0,
 		3, 3,
 	}
 
-	paths := maze.DepthFirstSearch(
+	paths := maze.depthFirstSearch(
 		key,
 	)
 
